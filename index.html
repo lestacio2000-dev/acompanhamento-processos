@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Controle pessoal e seguro de prazos processuais">
+  <link rel="manifest" href="manifest.json">
+  <title>Acompanhamento de Processos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <style>
+    [hidden] { display: none !important; }
+    @media print {
+      body * { visibility: hidden; }
+      #relatorio, #relatorio * { visibility: visible; }
+      #relatorio { position: absolute; inset: 0; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">
+  <header class="bg-slate-900 text-white shadow">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <div><h1 class="text-xl font-semibold">Acompanhamento de Processos</h1><p class="text-sm text-slate-300">Controle individual de prazos</p></div>
+      <button id="logoutBtn" hidden class="rounded-lg border border-slate-500 px-3 py-2 text-sm hover:bg-slate-800">Sair</button>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-6xl space-y-6 p-4">
+    <div id="status" role="status" aria-live="polite" hidden class="rounded-lg border px-4 py-3 text-sm"></div>
+
+    <section id="configSection" class="rounded-xl bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold">Configuração do Supabase</h2>
+      <p class="mt-1 text-sm text-slate-600">Informe a URL do projeto e a chave pública (anon). Os dados ficam somente neste navegador.</p>
+      <form id="configForm" class="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_auto]">
+        <label class="text-sm font-medium">URL do projeto<input id="supabaseUrl" type="url" required placeholder="https://seu-projeto.supabase.co" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <label class="text-sm font-medium">Chave pública anon<input id="supabaseKey" type="password" required autocomplete="off" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <button class="self-end rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-700">Conectar</button>
+      </form>
+    </section>
+
+    <section id="authSection" hidden class="mx-auto max-w-md rounded-xl bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold">Entrar ou criar conta</h2>
+      <form id="authForm" class="mt-4 space-y-4">
+        <label class="block text-sm font-medium">E-mail<input id="email" type="email" required autocomplete="email" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <label class="block text-sm font-medium">Senha<input id="password" type="password" required minlength="6" autocomplete="current-password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <div class="grid grid-cols-2 gap-3">
+          <button data-auth="login" class="rounded-lg bg-slate-900 px-4 py-2 font-medium text-white">Entrar</button>
+          <button data-auth="signup" class="rounded-lg border border-slate-900 px-4 py-2 font-medium">Cadastrar</button>
+        </div>
+        <button id="forgotPasswordBtn" type="button" class="w-full text-sm font-medium text-slate-700 underline hover:text-slate-900">Esqueci minha senha</button>
+      </form>
+    </section>
+
+    <section id="newPasswordSection" hidden class="mx-auto max-w-md rounded-xl bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold">Definir nova senha</h2>
+      <p class="mt-1 text-sm text-slate-600">Digite uma nova senha com pelo menos 6 caracteres.</p>
+      <form id="newPasswordForm" class="mt-4 space-y-4">
+        <label class="block text-sm font-medium">Nova senha<input id="newPassword" type="password" required minlength="6" autocomplete="new-password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <label class="block text-sm font-medium">Confirmar nova senha<input id="confirmNewPassword" type="password" required minlength="6" autocomplete="new-password" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+        <button class="w-full rounded-lg bg-slate-900 px-4 py-2 font-medium text-white">Salvar nova senha</button>
+      </form>
+    </section>
+
+    <div id="appSection" hidden class="space-y-6">
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold">Cadastrar processo</h2>
+        <form id="processForm" class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <label class="text-sm font-medium">Número CNJ ou IDEA/MPBA<input id="numero" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="CNJ ou 003.9.323097/2026"></label>
+          <label class="text-sm font-medium">Tipo<select id="tipo" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option>Inquérito</option><option>Ação Penal</option><option>Medida Cautelar</option></select></label>
+          <label class="text-sm font-medium">Subtipo<select id="subtipo" required disabled class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione o tipo</option></select></label>
+          <label class="text-sm font-medium">Data final do prazo<input id="dataPrazo" type="date" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+          <button class="rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 md:col-span-2 lg:col-span-4">Salvar processo</button>
+        </form>
+      </section>
+
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold">Importar planilha</h2>
+        <p class="mt-1 text-sm text-slate-600">Arquivo .xlsx com as colunas Numero, Tipo, Subtipo e Prazo. Use exatamente uma das finalidades disponíveis no cadastro. A leitura ocorre localmente.</p>
+        <input id="xlsxInput" type="file" accept=".xlsx" class="mt-4 block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-white">
+      </section>
+
+      <section id="relatorio" class="rounded-xl bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold">Relatório de prazos</h2>
+        <p class="mt-1 text-sm text-slate-600 no-print">Sem datas, o relatório é geral. Informe início e/ou fim para gerar um relatório parcial.</p>
+        <div class="no-print mt-4 grid gap-4 md:grid-cols-3">
+          <label class="text-sm font-medium">Data início<input id="dataInicio" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+          <label class="text-sm font-medium">Data fim<input id="dataFim" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
+          <button id="printBtn" class="self-end rounded-lg border border-slate-900 px-4 py-2 font-medium">Imprimir relatório</button>
+        </div>
+        <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b bg-slate-50"><tr><th class="p-3">Número</th><th class="p-3">Tipo</th><th class="p-3">Subtipo</th><th class="p-3">Prazo</th></tr></thead><tbody id="reportBody"></tbody></table></div>
+      </section>
+
+      <section class="rounded-xl bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold">Processos ativos</h2>
+        <div id="processList" class="mt-4 grid gap-3"></div>
+      </section>
+    </div>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
