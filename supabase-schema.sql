@@ -16,6 +16,28 @@ alter table public.processos enable row level security;
 drop policy if exists "usuarios leem seus processos" on public.processos;
 drop policy if exists "usuarios criam seus processos" on public.processos;
 drop policy if exists "usuarios excluem seus processos" on public.processos;
-create policy "usuarios leem seus processos" on public.processos for select using ((select auth.uid()) = user_id);
-create policy "usuarios criam seus processos" on public.processos for insert with check ((select auth.uid()) = user_id);
-create policy "usuarios excluem seus processos" on public.processos for delete using ((select auth.uid()) = user_id);
+drop policy if exists "equipe le acervo compartilhado" on public.processos;
+drop policy if exists "equipe cria no acervo compartilhado" on public.processos;
+drop policy if exists "equipe exclui do acervo compartilhado" on public.processos;
+
+-- Acervo único: qualquer usuário autenticado neste projeto integra a equipe.
+-- O user_id registra quem incluiu o processo, sem restringir a leitura da equipe.
+create policy "equipe le acervo compartilhado" on public.processos
+  for select to authenticated using (true);
+create policy "equipe cria no acervo compartilhado" on public.processos
+  for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "equipe exclui do acervo compartilhado" on public.processos
+  for delete to authenticated using (true);
+
+-- Habilita eventos de inclusão e exclusão para as telas conectadas.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'processos'
+  ) then
+    alter publication supabase_realtime add table public.processos;
+  end if;
+end $$;

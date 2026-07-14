@@ -35,6 +35,7 @@
   let currentUser = null;
   let processos = [];
   let recoveringPassword = false;
+  let realtimeChannel = null;
 
   function status(message, error = false) {
     const box = $('status');
@@ -49,7 +50,24 @@
     $('authSection').hidden = !!user || recoveringPassword;
     $('appSection').hidden = !user || recoveringPassword;
     $('logoutBtn').hidden = !user || recoveringPassword;
-    if (user) loadProcessos(); else { processos = []; render(); }
+    if (user) {
+      loadProcessos();
+      subscribeToProcessos();
+    } else {
+      if (realtimeChannel && db) db.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+      processos = [];
+      render();
+    }
+  }
+
+  function subscribeToProcessos() {
+    if (!db || realtimeChannel) return;
+    realtimeChannel = db.channel('acervo-processos')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'processos' }, () => loadProcessos())
+      .subscribe(statusValue => {
+        if (statusValue === 'CHANNEL_ERROR') status('Não foi possível ativar a atualização em tempo real.', true);
+      });
   }
 
   async function connect(url, key) {
@@ -73,7 +91,7 @@
 
   async function loadProcessos() {
     if (!currentUser) return;
-    const { data, error } = await db.from('processos').select('*').eq('user_id', currentUser.id).order('data_prazo');
+    const { data, error } = await db.from('processos').select('*').order('data_prazo');
     if (error) return status(error.message, true);
     processos = data ?? [];
     render();
@@ -151,7 +169,7 @@
   $('processList').addEventListener('click', async event => {
     const id = event.target.dataset.delete;
     if (!id || !confirm('Excluir este processo definitivamente?')) return;
-    const { error } = await db.from('processos').delete().eq('id', id).eq('user_id', currentUser.id);
+    const { error } = await db.from('processos').delete().eq('id', id);
     if (error) return status(error.message, true);
     status('Processo excluído.'); await loadProcessos();
   });

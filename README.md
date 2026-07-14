@@ -1,6 +1,6 @@
 # Acompanhamento de Processos
 
-PWA estática multiusuário, integrada diretamente ao Supabase.
+PWA estática multiusuário, integrada diretamente ao Supabase, com acervo institucional compartilhado e atualização em tempo real.
 
 ## Configuração
 
@@ -11,7 +11,9 @@ PWA estática multiusuário, integrada diretamente ao Supabase.
 
 Para recuperar uma senha, informe o e-mail no formulário e clique em **Esqueci minha senha**. Abra o link recebido no mesmo computador para definir a nova senha. Em produção, cadastre a URL publicada em **Authentication > URL Configuration > Redirect URLs** no painel do Supabase.
 
-Nunca use a chave `service_role` no aplicativo. O isolamento entre usuários é garantido pelas políticas RLS e reforçado pelos filtros explícitos no cliente.
+Nunca use a chave `service_role` no aplicativo. As políticas RLS permitem acesso ao acervo somente a usuários autenticados. Cada pessoa usa seu próprio login, mas todos os usuários cadastrados neste projeto Supabase compartilham os mesmos processos.
+
+> Segurança: como todos os usuários autenticados integram o acervo, desative novos cadastros públicos em produção e crie manualmente apenas os usuários autorizados do gabinete.
 
 ## Dados aceitos
 
