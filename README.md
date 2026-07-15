@@ -19,7 +19,9 @@ Nunca use a chave `service_role` no aplicativo. As políticas RLS permitem acess
 
 - CNJ: `8120938-59.2026.8.05.0001`
 - IDEA/MPBA: `003.9.323097/2026`
-- Planilha: colunas `Numero`, `Tipo`, `Subtipo` e `Prazo`.
+- Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo` e `Prazo`. Em `Atuacao`, use `Titularidade` ou `Substituição`.
+
+O acervo é separado logicamente entre **Titularidade — 3ª Promotoria de Tóxicos/4º Promotor** e **Substituição — 3ª Promotoria de Tóxicos/1º Promotor**. A lista identifica a atuação e o relatório permite consultar uma delas ou ambas.
 
 Os sinais dos números são removidos antes da gravação e recompostos na exibição. Isso permite pesquisa e armazenamento consistentes sem perder o padrão visual oficial.
 

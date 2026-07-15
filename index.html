@@ -67,34 +67,39 @@
     <div id="appSection" hidden class="space-y-6">
       <section class="rounded-xl bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold">Cadastrar processo</h2>
-        <form id="processForm" class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <form id="processForm" class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           <label class="text-sm font-medium">Número CNJ ou IDEA/MPBA<input id="numero" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="CNJ ou 003.9.323097/2026"></label>
+          <label class="text-sm font-medium">Atuação<select id="atuacao" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option value="Titularidade">Titularidade — 4º Promotor</option><option value="Substituição">Substituição — 1º Promotor</option></select></label>
           <label class="text-sm font-medium">Tipo<select id="tipo" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option>Inquérito</option><option>Ação Penal</option><option>Medida Cautelar</option></select></label>
           <label class="text-sm font-medium">Subtipo<select id="subtipo" required disabled class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione o tipo</option></select></label>
           <label class="text-sm font-medium">Data final do prazo<input id="dataPrazo" type="date" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
-          <button class="rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 md:col-span-2 lg:col-span-4">Salvar processo</button>
+          <button class="rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 md:col-span-2 lg:col-span-5">Salvar processo</button>
         </form>
       </section>
 
       <section class="rounded-xl bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold">Importar planilha</h2>
-        <p class="mt-1 text-sm text-slate-600">Arquivo .xlsx com as colunas Numero, Tipo, Subtipo e Prazo. Use exatamente uma das finalidades disponíveis no cadastro. A leitura ocorre localmente.</p>
+        <p class="mt-1 text-sm text-slate-600">Arquivo .xlsx com as colunas Numero, Atuacao, Tipo, Subtipo e Prazo. Em Atuacao, use Titularidade ou Substituição. A leitura ocorre localmente.</p>
         <input id="xlsxInput" type="file" accept=".xlsx" class="mt-4 block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-white">
       </section>
 
       <section id="relatorio" class="rounded-xl bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold">Relatório de prazos</h2>
         <p class="mt-1 text-sm text-slate-600 no-print">Sem datas, o relatório é geral. Informe início e/ou fim para gerar um relatório parcial.</p>
-        <div class="no-print mt-4 grid gap-4 md:grid-cols-3">
+        <div class="no-print mt-4 grid gap-4 md:grid-cols-4">
+          <label class="text-sm font-medium">Atuação<select id="reportAtuacao" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Todas</option><option value="Titularidade">Titularidade — 4º Promotor</option><option value="Substituição">Substituição — 1º Promotor</option></select></label>
           <label class="text-sm font-medium">Data início<input id="dataInicio" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
           <label class="text-sm font-medium">Data fim<input id="dataFim" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
           <button id="printBtn" class="self-end rounded-lg border border-slate-900 px-4 py-2 font-medium">Imprimir relatório</button>
         </div>
-        <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b bg-slate-50"><tr><th class="p-3">Número</th><th class="p-3">Tipo</th><th class="p-3">Subtipo</th><th class="p-3">Prazo</th></tr></thead><tbody id="reportBody"></tbody></table></div>
+        <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b bg-slate-50"><tr><th class="p-3">Número</th><th class="p-3">Atuação</th><th class="p-3">Tipo</th><th class="p-3">Subtipo</th><th class="p-3">Prazo</th></tr></thead><tbody id="reportBody"></tbody></table></div>
       </section>
 
       <section class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold">Processos ativos</h2>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <h2 class="text-lg font-semibold">Processos ativos</h2>
+          <label class="text-sm font-medium">Acervo exibido<select id="listAtuacao" class="mt-1 block rounded-lg border border-slate-300 px-3 py-2"><option value="Titularidade">Titularidade — 4º Promotor</option><option value="Substituição">Substituição — 1º Promotor</option><option value="">Todos</option></select></label>
+        </div>
         <div id="processList" class="mt-4 grid gap-3"></div>
       </section>
     </div>
