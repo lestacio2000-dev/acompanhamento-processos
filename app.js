@@ -1,6 +1,11 @@
 (() => {
   'use strict';
 
+  // A Publishable key é própria para clientes públicos. A segurança dos dados
+  // permanece sob responsabilidade do login e das políticas RLS do Supabase.
+  const DEFAULT_SUPABASE_URL = 'https://uyukkhfjmpvhkiuftmob.supabase.co';
+  const DEFAULT_SUPABASE_KEY = 'sb_publishable_O1y_D3brXF3twhpWhZQ9RQ_mRtIX3yT';
+
   const SUBTIPOS = Object.freeze({
     'Inquérito': ['Diligência para Antecedentes', 'Audiência de ANPP', 'Retorno ao Delegado', 'Denúncia'],
     'Ação Penal': ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos'],
@@ -202,8 +207,13 @@
   $('listAtuacao').addEventListener('change', render);
   $('printBtn').addEventListener('click', () => window.print());
 
-  const savedUrl = localStorage.getItem('processos.supabaseUrl');
-  const savedKey = localStorage.getItem('processos.supabaseKey');
-  if (savedUrl && savedKey) { $('supabaseUrl').value = savedUrl; $('supabaseKey').value = savedKey; connect(savedUrl, savedKey).catch(error => status(error.message, true)); }
+  const savedUrl = localStorage.getItem('processos.supabaseUrl') || DEFAULT_SUPABASE_URL;
+  const savedKey = localStorage.getItem('processos.supabaseKey') || DEFAULT_SUPABASE_KEY;
+  $('supabaseUrl').value = savedUrl;
+  $('supabaseKey').value = savedKey;
+  connect(savedUrl, savedKey).catch(error => {
+    $('configSection').hidden = false;
+    status(`Não foi possível conectar automaticamente: ${error.message}`, true);
+  });
   if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
 })();

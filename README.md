@@ -6,7 +6,7 @@ PWA estática multiusuário, integrada diretamente ao Supabase, com acervo insti
 
 1. Crie um projeto no Supabase e execute `supabase-schema.sql` no SQL Editor.
 2. Sirva esta pasta por HTTP (por exemplo, `python3 -m http.server 8080`).
-3. Abra `http://localhost:8080`, informe a URL do projeto e a chave pública `anon`.
+3. Abra `http://localhost:8080`. A URL e a Publishable key já estão configuradas no cliente; a tela técnica só aparece se a conexão automática falhar.
 4. Cadastre um usuário. Se a confirmação de e-mail estiver ativa, confirme antes de entrar.
 
 Para recuperar uma senha, informe o e-mail no formulário e clique em **Esqueci minha senha**. Abra o link recebido no mesmo computador para definir a nova senha. Em produção, cadastre a URL publicada em **Authentication > URL Configuration > Redirect URLs** no painel do Supabase.
