@@ -1,4 +1,4 @@
-const CACHE = 'acompanhamento-processos-v2';
+const CACHE = 'acompanhamento-processos-v4';
 const LOCAL_ASSETS = ['./', './index.html', './app.js', './manifest.json'];
 
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(LOCAL_ASSETS)).then(() => self.skipWaiting())));

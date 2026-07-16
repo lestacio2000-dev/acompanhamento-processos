@@ -7,7 +7,8 @@
   const DEFAULT_SUPABASE_KEY = 'sb_publishable_O1y_D3brXF3twhpWhZQ9RQ_mRtIX3yT';
 
   const SUBTIPOS = Object.freeze({
-    'Inquérito': ['Diligência para Antecedentes', 'Audiência de ANPP', 'Retorno ao Delegado', 'Denúncia'],
+    'Inquérito': ['Declínio', 'Arquivamento', 'Retorno à DEPOL'],
+    'APF': ['Não se aplica'],
     'Ação Penal': ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos'],
     'Medida Cautelar': ['Ciência', 'Diligência', 'Manifestação']
   });
@@ -32,6 +33,7 @@
   };
   const filterByDate = (items, start, end) => items.filter(item => (!start || item.data_prazo >= start) && (!end || item.data_prazo <= end));
   const filterByAtuacao = (items, atuacao) => items.filter(item => !atuacao || item.atuacao === atuacao);
+  const pessoaHtml = value => value === 'Preso' ? '<span class="font-semibold text-red-700">Preso</span>' : escapeHtml(value);
 
   if (typeof module !== 'undefined' && module.exports) module.exports = { SUBTIPOS, normalizeNumero, formatNumero, isValidNumero, isoDate, filterByDate, filterByAtuacao };
   if (typeof document === 'undefined') return;
@@ -110,9 +112,9 @@
 
   function render() {
     const filtered = filterByAtuacao(filterByDate(processos, $('dataInicio').value, $('dataFim').value), $('reportAtuacao').value);
-    $('reportBody').innerHTML = filtered.length ? filtered.map(p => `<tr class="border-b"><td class="p-3">${escapeHtml(formatNumero(p.numero_processo))}</td><td class="p-3">${escapeHtml(p.atuacao)}</td><td class="p-3">${escapeHtml(p.tipo)}</td><td class="p-3">${escapeHtml(p.subtipo)}</td><td class="p-3">${formatDate(p.data_prazo)}</td></tr>`).join('') : '<tr><td colspan="5" class="p-6 text-center text-slate-500">Nenhum prazo nos filtros selecionados.</td></tr>';
+    $('reportBody').innerHTML = filtered.length ? filtered.map(p => `<tr class="border-b"><td class="p-3">${escapeHtml(formatNumero(p.numero_processo))}</td><td class="p-3">${escapeHtml(p.atuacao)}</td><td class="p-3">${escapeHtml(p.tipo)}</td><td class="p-3">${escapeHtml(p.subtipo)}</td><td class="p-3">${pessoaHtml(p.situacao_pessoa)}</td><td class="p-3">${escapeHtml(p.situacao_envio)}</td><td class="p-3">${formatDate(p.data_prazo)}</td></tr>`).join('') : '<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum prazo nos filtros selecionados.</td></tr>';
     const activeList = filterByAtuacao(processos, $('listAtuacao').value);
-    $('processList').innerHTML = activeList.length ? activeList.map(p => `<article class="flex flex-col justify-between gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center"><div><strong>${escapeHtml(formatNumero(p.numero_processo))}</strong><p class="text-sm font-medium text-slate-700">${escapeHtml(p.atuacao)} — 3ª Promotoria de Tóxicos</p><p class="text-sm text-slate-600">${escapeHtml(p.tipo)} · ${escapeHtml(p.subtipo)} · prazo ${formatDate(p.data_prazo)}</p></div><button data-delete="${p.id}" class="rounded-lg bg-red-700 px-3 py-2 text-sm font-medium text-white">Excluir Processo</button></article>`).join('') : '<p class="text-sm text-slate-500">Nenhum processo neste acervo.</p>';
+    $('processList').innerHTML = activeList.length ? activeList.map(p => `<article class="flex flex-col justify-between gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center"><div><strong>${escapeHtml(formatNumero(p.numero_processo))}</strong><p class="text-sm font-medium text-slate-700">${escapeHtml(p.atuacao)} — 3ª Promotoria de Tóxicos</p><p class="text-sm text-slate-600">${escapeHtml(p.tipo)} · ${escapeHtml(p.subtipo)} · ${pessoaHtml(p.situacao_pessoa)} · ${escapeHtml(p.situacao_envio)} · prazo ${formatDate(p.data_prazo)}</p></div><div class="flex flex-wrap gap-2">${p.situacao_envio === 'Pendente' ? `<button data-mark-sent="${p.id}" class="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800">Marcar como enviado</button>` : ''}<button data-delete="${p.id}" class="rounded-lg bg-red-700 px-3 py-2 text-sm font-medium text-white">Excluir Processo</button></div></article>`).join('') : '<p class="text-sm text-slate-500">Nenhum processo neste acervo.</p>';
   }
 
   function updateSubtipos() {
@@ -162,11 +164,15 @@
 
   $('logoutBtn').addEventListener('click', () => db?.auth.signOut());
   $('tipo').addEventListener('change', updateSubtipos);
+  $('situacaoPessoa').addEventListener('change', event => {
+    event.target.classList.toggle('font-semibold', event.target.value === 'Preso');
+    event.target.classList.toggle('text-red-700', event.target.value === 'Preso');
+  });
   $('numero').addEventListener('blur', event => { event.target.value = formatNumero(event.target.value); });
 
   $('processForm').addEventListener('submit', async event => {
     event.preventDefault();
-    const row = { user_id: currentUser.id, numero_processo: normalizeNumero($('numero').value), atuacao: $('atuacao').value, tipo: $('tipo').value, subtipo: $('subtipo').value, data_prazo: $('dataPrazo').value };
+    const row = { user_id: currentUser.id, numero_processo: normalizeNumero($('numero').value), atuacao: $('atuacao').value, tipo: $('tipo').value, subtipo: $('subtipo').value, situacao_pessoa: $('situacaoPessoa').value, situacao_envio: $('situacaoEnvio').value, data_prazo: $('dataPrazo').value };
     if (!isValidNumero($('numero').value)) return status('Número inválido. Use o padrão CNJ 8120938-59.2026.8.05.0001 ou IDEA 003.9.323097/2026.', true);
     const { error } = await db.from('processos').insert(row);
     if (error) return status(error.message, true);
@@ -174,6 +180,14 @@
   });
 
   $('processList').addEventListener('click', async event => {
+    const sentId = event.target.dataset.markSent;
+    if (sentId) {
+      if (!confirm('Marcar este processo como enviado?')) return;
+      const { error } = await db.from('processos').update({ situacao_envio: 'Enviado' }).eq('id', sentId);
+      if (error) return status(error.message, true);
+      status('Processo marcado como enviado. A notificação será disparada se o Telegram estiver configurado.');
+      return loadProcessos();
+    }
     const id = event.target.dataset.delete;
     if (!id || !confirm('Excluir este processo definitivamente?')) return;
     const { error } = await db.from('processos').delete().eq('id', id);
@@ -188,10 +202,10 @@
       const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
       const raw = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '' });
       const rows = raw.map((r, index) => ({
-        user_id: currentUser.id, numero_processo: normalizeNumero(r.Numero), atuacao: String(r.Atuacao ?? r.Atuação).trim(), tipo: String(r.Tipo).trim(), subtipo: String(r.Subtipo).trim(), data_prazo: isoDate(r.Prazo), _line: index + 2
+        user_id: currentUser.id, numero_processo: normalizeNumero(r.Numero), atuacao: String(r.Atuacao ?? r.Atuação).trim(), tipo: String(r.Tipo).trim(), subtipo: String(r.Subtipo).trim(), situacao_pessoa: String(r.SituacaoPessoa ?? r['SituaçãoPessoa']).trim(), situacao_envio: String(r.SituacaoEnvio ?? r['SituaçãoEnvio']).trim(), data_prazo: isoDate(r.Prazo), _line: index + 2
       }));
-      const invalid = rows.find(r => !isValidNumero(r.numero_processo) || !['Titularidade', 'Substituição'].includes(r.atuacao) || !SUBTIPOS[r.tipo]?.includes(r.subtipo) || !r.data_prazo);
-      if (invalid) throw new Error(`Dados inválidos na linha ${invalid._line}. Confira Numero, Atuacao, Tipo, Subtipo e Prazo.`);
+      const invalid = rows.find(r => !isValidNumero(r.numero_processo) || !['Titularidade', 'Substituição'].includes(r.atuacao) || !SUBTIPOS[r.tipo]?.includes(r.subtipo) || !['Preso', 'Solto'].includes(r.situacao_pessoa) || !['Pendente', 'Enviado'].includes(r.situacao_envio) || !r.data_prazo);
+      if (invalid) throw new Error(`Dados inválidos na linha ${invalid._line}. Confira Numero, Atuacao, Tipo, Subtipo, SituacaoPessoa, SituacaoEnvio e Prazo.`);
       if (!rows.length) throw new Error('A planilha não contém registros.');
       rows.forEach(r => delete r._line);
       const { error } = await db.from('processos').insert(rows);

@@ -19,7 +19,21 @@ Nunca use a chave `service_role` no aplicativo. As políticas RLS permitem acess
 
 - CNJ: `8120938-59.2026.8.05.0001`
 - IDEA/MPBA: `003.9.323097/2026`
-- Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo` e `Prazo`. Em `Atuacao`, use `Titularidade` ou `Substituição`.
+- Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo`, `SituacaoPessoa`, `SituacaoEnvio` e `Prazo`. Em `Atuacao`, use `Titularidade` ou `Substituição`; em `SituacaoPessoa`, `Preso` ou `Solto`; e em `SituacaoEnvio`, `Pendente` ou `Enviado`.
+
+O tipo `Inquérito` oferece os subtipos `Declínio`, `Arquivamento` e `Retorno à DEPOL`. O tipo `APF` usa o subtipo `Não se aplica`. A situação `Preso` aparece em vermelho nas listagens e nos relatórios.
+
+Processos pendentes exibem a ação **Marcar como enviado**. A alteração é compartilhada em tempo real e pode disparar uma mensagem pelo Telegram.
+
+## Notificação pelo Telegram
+
+1. Crie o bot pelo `@BotFather` e adicione-o à conversa ou ao grupo destinatário.
+2. Descubra o `chat_id` da conversa.
+3. No Supabase Vault, crie `telegram_bot_token` com o token do bot e `telegram_chat_id` com o identificador da conversa.
+4. Execute novamente `supabase-schema.sql` no SQL Editor para instalar a política de atualização e o gatilho.
+5. Cadastre um processo como `Pendente` e use **Marcar como enviado** para testar.
+
+O token é secreto: não o coloque em `app.js`, neste README, no GitHub ou em qualquer arquivo publicado. Se os segredos ainda não estiverem configurados, o processo será atualizado normalmente e nenhuma mensagem será enviada.
 
 O acervo é separado logicamente entre **Titularidade — 3ª Promotoria de Tóxicos/4º Promotor** e **Substituição — 3ª Promotoria de Tóxicos/1º Promotor**. A lista identifica a atuação e o relatório permite consultar uma delas ou ambas.
 
