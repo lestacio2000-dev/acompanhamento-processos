@@ -25,6 +25,11 @@ assert.equal(isValidNumero('003.9.323097/2026'), true);
 assert.equal(isValidNumero('12345'), false);
 
 const source = fs.readFileSync(require.resolve('../app.js'), 'utf8');
+const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
+const serviceWorker = fs.readFileSync(require.resolve('../service-worker.js'), 'utf8');
+assert.match(html, /app\.js\?v=6/, 'O HTML deve invalidar versões antigas do JavaScript');
+assert.match(source, /service-worker\.js\?v=6/, 'O aplicativo deve solicitar a versão atual do service worker');
+assert.match(serviceWorker, /acompanhamento-processos-v6/, 'O cache da PWA deve ser renovado');
 assert.match(source, /channel\('acervo-processos'\)/, 'O aplicativo deve assinar o canal Realtime do acervo');
 assert.match(source, /event: '\*', schema: 'public', table: 'processos'/, 'O canal deve acompanhar todas as mudanças em processos');
 assert.doesNotMatch(source, /select\('\*'\)\.eq\('user_id'/, 'A consulta não deve limitar o acervo ao criador do registro');

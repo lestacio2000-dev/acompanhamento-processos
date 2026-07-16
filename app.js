@@ -229,5 +229,5 @@
     $('configSection').hidden = false;
     status(`Não foi possível conectar automaticamente: ${error.message}`, true);
   });
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=6').catch(() => {}));
 })();
