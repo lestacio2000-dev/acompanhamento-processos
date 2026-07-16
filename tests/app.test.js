@@ -2,9 +2,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { SUBTIPOS, normalizeNumero, formatNumero, isValidNumero, filterByDate, filterByAtuacao } = require('../app.js');
 
-assert.deepEqual(SUBTIPOS['Inquérito'], ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP']);
-assert.deepEqual(SUBTIPOS.APF, ['Não se aplica']);
-assert.deepEqual(SUBTIPOS['Ação Penal'], ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos']);
+assert.deepEqual(SUBTIPOS['Inquérito'], ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP', 'Denúncia']);
+assert.deepEqual(SUBTIPOS.APF, ['Ciência', 'Manifestação']);
+assert.deepEqual(SUBTIPOS['Ação Penal'], ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos', 'Relaxamento', 'Revogação']);
 assert.deepEqual(SUBTIPOS['Medida Cautelar'], ['Ciência', 'Diligência', 'Manifestação']);
 assert.notDeepEqual(SUBTIPOS['Inquérito'], SUBTIPOS['Ação Penal'], 'A troca de tipo deve trocar imediatamente o conjunto de subtipos');
 
@@ -27,9 +27,13 @@ assert.equal(isValidNumero('12345'), false);
 const source = fs.readFileSync(require.resolve('../app.js'), 'utf8');
 const html = fs.readFileSync(require.resolve('../index.html'), 'utf8');
 const serviceWorker = fs.readFileSync(require.resolve('../service-worker.js'), 'utf8');
-assert.match(html, /app\.js\?v=6/, 'O HTML deve invalidar versões antigas do JavaScript');
-assert.match(source, /service-worker\.js\?v=6/, 'O aplicativo deve solicitar a versão atual do service worker');
-assert.match(serviceWorker, /acompanhamento-processos-v6/, 'O cache da PWA deve ser renovado');
+assert.match(html, /app\.js\?v=7/, 'O HTML deve invalidar versões antigas do JavaScript');
+assert.match(source, /service-worker\.js\?v=7/, 'O aplicativo deve solicitar a versão atual do service worker');
+assert.match(serviceWorker, /acompanhamento-processos-v7/, 'O cache da PWA deve ser renovado');
+assert.match(html, /id="observacao" maxlength="100"/, 'O formulário deve limitar a observação a 100 caracteres');
+assert.match(source, /data-edit=/, 'Cada processo deve oferecer a ação Editar');
+assert.match(source, /\.update\(row\)\.eq\('id', editingId\)/, 'A edição deve atualizar o registro existente');
+assert.match(source, /addEventListener\('change', \(\) => updateSubtipos\(\)\)/, 'A troca de tipo deve reconstruir os subtipos sem reutilizar o evento como valor');
 assert.match(source, /channel\('acervo-processos'\)/, 'O aplicativo deve assinar o canal Realtime do acervo');
 assert.match(source, /event: '\*', schema: 'public', table: 'processos'/, 'O canal deve acompanhar todas as mudanças em processos');
 assert.doesNotMatch(source, /select\('\*'\)\.eq\('user_id'/, 'A consulta não deve limitar o acervo ao criador do registro');
@@ -41,5 +45,6 @@ const schema = fs.readFileSync(require.resolve('../supabase-schema.sql'), 'utf8'
 assert.match(schema, /for update to authenticated/, 'Usuários autenticados devem poder marcar processos como enviados');
 assert.match(schema, /telegram_bot_token/, 'O token do Telegram deve ser lido do Supabase Vault');
 assert.match(schema, /timeout_milliseconds := 15000/, 'O Telegram deve tolerar latência de até 15 segundos');
+assert.match(schema, /char_length\(observacao\) <= 100/, 'O banco deve limitar a observação a 100 caracteres');
 assert.doesNotMatch(schema, /bot\d+:[A-Za-z0-9_-]+/, 'O schema não deve conter token real de bot');
 console.log('Todos os testes passaram.');

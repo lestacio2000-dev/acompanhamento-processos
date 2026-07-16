@@ -10,6 +10,7 @@ create table if not exists public.processos (
   subtipo text not null,
   situacao_pessoa text not null default 'Solto' check (situacao_pessoa in ('Preso', 'Solto')),
   situacao_envio text not null default 'Pendente' check (situacao_envio in ('Pendente', 'Enviado')),
+  observacao text not null default '' check (char_length(observacao) <= 100),
   data_prazo date not null,
   criado_em timestamptz not null default now()
 );
@@ -18,6 +19,7 @@ create table if not exists public.processos (
 alter table public.processos add column if not exists atuacao text not null default 'Titularidade';
 alter table public.processos add column if not exists situacao_pessoa text not null default 'Solto';
 alter table public.processos add column if not exists situacao_envio text not null default 'Pendente';
+alter table public.processos add column if not exists observacao text not null default '';
 alter table public.processos drop constraint if exists processos_tipo_check;
 alter table public.processos add constraint processos_tipo_check
   check (tipo in ('Inquérito', 'APF', 'Ação Penal', 'Medida Cautelar'));
@@ -27,6 +29,9 @@ alter table public.processos add constraint processos_situacao_pessoa_check
 alter table public.processos drop constraint if exists processos_situacao_envio_check;
 alter table public.processos add constraint processos_situacao_envio_check
   check (situacao_envio in ('Pendente', 'Enviado'));
+alter table public.processos drop constraint if exists processos_observacao_check;
+alter table public.processos add constraint processos_observacao_check
+  check (char_length(observacao) <= 100);
 do $$
 begin
   if not exists (select 1 from pg_constraint where conname = 'processos_atuacao_check') then
@@ -88,7 +93,8 @@ begin
       'Atuação: ', new.atuacao, E'\n',
       'Tipo: ', new.tipo, ' — ', new.subtipo, E'\n',
       'Situação: ', new.situacao_pessoa, E'\n',
-      'Prazo: ', to_char(new.data_prazo, 'DD/MM/YYYY')
+      'Prazo: ', to_char(new.data_prazo, 'DD/MM/YYYY'),
+      case when new.observacao <> '' then E'\n' || 'Observação: ' || new.observacao else '' end
     );
 
     perform net.http_post(

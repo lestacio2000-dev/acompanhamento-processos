@@ -66,7 +66,7 @@
 
     <div id="appSection" hidden class="space-y-6">
       <section class="rounded-xl bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold">Cadastrar processo</h2>
+        <h2 id="processFormTitle" class="text-lg font-semibold">Cadastrar processo</h2>
         <form id="processForm" class="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <label class="text-sm font-medium">Número CNJ ou IDEA/MPBA<input id="numero" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="CNJ ou 003.9.323097/2026"></label>
           <label class="text-sm font-medium">Atuação<select id="atuacao" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option value="Titularidade">Titularidade — 4º Promotor</option><option value="Substituição">Substituição — 1º Promotor</option></select></label>
@@ -75,13 +75,17 @@
           <label class="text-sm font-medium">Situação da pessoa<select id="situacaoPessoa" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option value="Preso" class="font-semibold text-red-700">Preso</option><option value="Solto">Solto</option></select></label>
           <label class="text-sm font-medium">Situação do envio<select id="situacaoEnvio" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"><option value="">Selecione</option><option value="Pendente">Pendente</option><option value="Enviado">Enviado</option></select></label>
           <label class="text-sm font-medium">Data final do prazo<input id="dataPrazo" type="date" required class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
-          <button class="rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800 md:col-span-2 lg:col-span-4">Salvar processo</button>
+          <label class="text-sm font-medium md:col-span-2 lg:col-span-4">Observação (até 100 caracteres)<textarea id="observacao" maxlength="100" rows="2" class="mt-1 w-full resize-y rounded-lg border border-slate-300 px-3 py-2" placeholder="Texto livre opcional"></textarea></label>
+          <div class="flex flex-wrap gap-3 md:col-span-2 lg:col-span-4">
+            <button id="saveProcessBtn" class="flex-1 rounded-lg bg-emerald-700 px-4 py-2 font-medium text-white hover:bg-emerald-800">Salvar processo</button>
+            <button id="cancelEditBtn" type="button" hidden class="rounded-lg border border-slate-400 px-4 py-2 font-medium text-slate-700 hover:bg-slate-100">Cancelar edição</button>
+          </div>
         </form>
       </section>
 
       <section class="rounded-xl bg-white p-6 shadow-sm">
         <h2 class="text-lg font-semibold">Importar planilha</h2>
-        <p class="mt-1 text-sm text-slate-600">Arquivo .xlsx com as colunas Numero, Atuacao, Tipo, Subtipo, SituacaoPessoa, SituacaoEnvio e Prazo. A leitura ocorre localmente.</p>
+        <p class="mt-1 text-sm text-slate-600">Arquivo .xlsx com as colunas Numero, Atuacao, Tipo, Subtipo, SituacaoPessoa, SituacaoEnvio, Prazo e, opcionalmente, Observacao. A leitura ocorre localmente.</p>
         <input id="xlsxInput" type="file" accept=".xlsx" class="mt-4 block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-white">
       </section>
 
@@ -94,7 +98,7 @@
           <label class="text-sm font-medium">Data fim<input id="dataFim" type="date" class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"></label>
           <button id="printBtn" class="self-end rounded-lg border border-slate-900 px-4 py-2 font-medium">Imprimir relatório</button>
         </div>
-        <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b bg-slate-50"><tr><th class="p-3">Número</th><th class="p-3">Atuação</th><th class="p-3">Tipo</th><th class="p-3">Subtipo</th><th class="p-3">Pessoa</th><th class="p-3">Envio</th><th class="p-3">Prazo</th></tr></thead><tbody id="reportBody"></tbody></table></div>
+        <div class="mt-4 overflow-x-auto"><table class="w-full text-left text-sm"><thead class="border-b bg-slate-50"><tr><th class="p-3">Número</th><th class="p-3">Atuação</th><th class="p-3">Tipo</th><th class="p-3">Subtipo</th><th class="p-3">Pessoa</th><th class="p-3">Envio</th><th class="p-3">Prazo</th><th class="p-3">Observação</th></tr></thead><tbody id="reportBody"></tbody></table></div>
       </section>
 
       <section class="rounded-xl bg-white p-6 shadow-sm">
@@ -106,6 +110,6 @@
       </section>
     </div>
   </main>
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

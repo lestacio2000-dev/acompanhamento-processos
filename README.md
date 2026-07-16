@@ -19,9 +19,11 @@ Nunca use a chave `service_role` no aplicativo. As políticas RLS permitem acess
 
 - CNJ: `8120938-59.2026.8.05.0001`
 - IDEA/MPBA: `003.9.323097/2026`
-- Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo`, `SituacaoPessoa`, `SituacaoEnvio` e `Prazo`. Em `Atuacao`, use `Titularidade` ou `Substituição`; em `SituacaoPessoa`, `Preso` ou `Solto`; e em `SituacaoEnvio`, `Pendente` ou `Enviado`.
+- Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo`, `SituacaoPessoa`, `SituacaoEnvio`, `Prazo` e, opcionalmente, `Observacao`. Em `Atuacao`, use `Titularidade` ou `Substituição`; em `SituacaoPessoa`, `Preso` ou `Solto`; em `SituacaoEnvio`, `Pendente` ou `Enviado`; e limite `Observacao` a 100 caracteres.
 
-O tipo `Inquérito` oferece os subtipos `Declínio`, `Arquivamento`, `Retorno à DEPOL`, `Diligência_Secretaria` e `audiencia ANPP`. O tipo `APF` usa o subtipo `Não se aplica`. A situação `Preso` aparece em vermelho nas listagens e nos relatórios.
+O tipo `Inquérito` oferece os subtipos `Declínio`, `Arquivamento`, `Retorno à DEPOL`, `Diligência_Secretaria`, `audiencia ANPP` e `Denúncia`. O tipo `APF` oferece `Ciência` e `Manifestação`. O tipo `Ação Penal` também oferece `Relaxamento` e `Revogação`. A situação `Preso` aparece em vermelho nas listagens e nos relatórios.
+
+Cada processo listado possui a ação **Editar**. Ela carrega o registro no formulário, permitindo alterar a situação da pessoa entre `Preso` e `Solto`, os demais campos e a observação livre de até 100 caracteres, sem criar um novo registro.
 
 Processos pendentes exibem a ação **Marcar como enviado**. A alteração é compartilhada em tempo real e pode disparar uma mensagem pelo Telegram.
 

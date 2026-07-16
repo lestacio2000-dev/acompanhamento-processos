@@ -7,9 +7,9 @@
   const DEFAULT_SUPABASE_KEY = 'sb_publishable_O1y_D3brXF3twhpWhZQ9RQ_mRtIX3yT';
 
   const SUBTIPOS = Object.freeze({
-    'Inquérito': ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP'],
-    'APF': ['Não se aplica'],
-    'Ação Penal': ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos'],
+    'Inquérito': ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP', 'Denúncia'],
+    'APF': ['Ciência', 'Manifestação'],
+    'Ação Penal': ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos', 'Relaxamento', 'Revogação'],
     'Medida Cautelar': ['Ciência', 'Diligência', 'Manifestação']
   });
 
@@ -44,6 +44,7 @@
   let processos = [];
   let recoveringPassword = false;
   let realtimeChannel = null;
+  let editingId = null;
 
   function status(message, error = false) {
     const box = $('status');
@@ -112,15 +113,52 @@
 
   function render() {
     const filtered = filterByAtuacao(filterByDate(processos, $('dataInicio').value, $('dataFim').value), $('reportAtuacao').value);
-    $('reportBody').innerHTML = filtered.length ? filtered.map(p => `<tr class="border-b"><td class="p-3">${escapeHtml(formatNumero(p.numero_processo))}</td><td class="p-3">${escapeHtml(p.atuacao)}</td><td class="p-3">${escapeHtml(p.tipo)}</td><td class="p-3">${escapeHtml(p.subtipo)}</td><td class="p-3">${pessoaHtml(p.situacao_pessoa)}</td><td class="p-3">${escapeHtml(p.situacao_envio)}</td><td class="p-3">${formatDate(p.data_prazo)}</td></tr>`).join('') : '<tr><td colspan="7" class="p-6 text-center text-slate-500">Nenhum prazo nos filtros selecionados.</td></tr>';
+    $('reportBody').innerHTML = filtered.length ? filtered.map(p => `<tr class="border-b"><td class="p-3">${escapeHtml(formatNumero(p.numero_processo))}</td><td class="p-3">${escapeHtml(p.atuacao)}</td><td class="p-3">${escapeHtml(p.tipo)}</td><td class="p-3">${escapeHtml(p.subtipo)}</td><td class="p-3">${pessoaHtml(p.situacao_pessoa)}</td><td class="p-3">${escapeHtml(p.situacao_envio)}</td><td class="p-3">${formatDate(p.data_prazo)}</td><td class="p-3">${escapeHtml(p.observacao || '—')}</td></tr>`).join('') : '<tr><td colspan="8" class="p-6 text-center text-slate-500">Nenhum prazo nos filtros selecionados.</td></tr>';
     const activeList = filterByAtuacao(processos, $('listAtuacao').value);
-    $('processList').innerHTML = activeList.length ? activeList.map(p => `<article class="flex flex-col justify-between gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center"><div><strong>${escapeHtml(formatNumero(p.numero_processo))}</strong><p class="text-sm font-medium text-slate-700">${escapeHtml(p.atuacao)} — 3ª Promotoria de Tóxicos</p><p class="text-sm text-slate-600">${escapeHtml(p.tipo)} · ${escapeHtml(p.subtipo)} · ${pessoaHtml(p.situacao_pessoa)} · ${escapeHtml(p.situacao_envio)} · prazo ${formatDate(p.data_prazo)}</p></div><div class="flex flex-wrap gap-2">${p.situacao_envio === 'Pendente' ? `<button data-mark-sent="${p.id}" class="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800">Marcar como enviado</button>` : ''}<button data-delete="${p.id}" class="rounded-lg bg-red-700 px-3 py-2 text-sm font-medium text-white">Excluir Processo</button></div></article>`).join('') : '<p class="text-sm text-slate-500">Nenhum processo neste acervo.</p>';
+    $('processList').innerHTML = activeList.length ? activeList.map(p => `<article class="flex flex-col justify-between gap-3 rounded-lg border border-slate-200 p-4 sm:flex-row sm:items-center"><div><strong>${escapeHtml(formatNumero(p.numero_processo))}</strong><p class="text-sm font-medium text-slate-700">${escapeHtml(p.atuacao)} — 3ª Promotoria de Tóxicos</p><p class="text-sm text-slate-600">${escapeHtml(p.tipo)} · ${escapeHtml(p.subtipo)} · ${pessoaHtml(p.situacao_pessoa)} · ${escapeHtml(p.situacao_envio)} · prazo ${formatDate(p.data_prazo)}</p>${p.observacao ? `<p class="mt-1 text-sm text-slate-700">Observação: ${escapeHtml(p.observacao)}</p>` : ''}</div><div class="flex flex-wrap gap-2"><button data-edit="${p.id}" class="rounded-lg border border-emerald-700 px-3 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-50">Editar</button>${p.situacao_envio === 'Pendente' ? `<button data-mark-sent="${p.id}" class="rounded-lg bg-blue-700 px-3 py-2 text-sm font-medium text-white hover:bg-blue-800">Marcar como enviado</button>` : ''}<button data-delete="${p.id}" class="rounded-lg bg-red-700 px-3 py-2 text-sm font-medium text-white">Excluir Processo</button></div></article>`).join('') : '<p class="text-sm text-slate-500">Nenhum processo neste acervo.</p>';
   }
 
-  function updateSubtipos() {
+  function updateSubtipos(selectedValue = '') {
     const options = SUBTIPOS[$('tipo').value] ?? [];
-    $('subtipo').innerHTML = '<option value="">Selecione</option>' + options.map(v => `<option>${v}</option>`).join('');
+    const values = selectedValue && !options.includes(selectedValue) ? [...options, selectedValue] : options;
+    $('subtipo').innerHTML = '<option value="">Selecione</option>' + values.map(v => `<option>${v}</option>`).join('');
     $('subtipo').disabled = !options.length;
+    $('subtipo').value = selectedValue;
+  }
+
+  function updatePessoaStyle() {
+    $('situacaoPessoa').classList.toggle('font-semibold', $('situacaoPessoa').value === 'Preso');
+    $('situacaoPessoa').classList.toggle('text-red-700', $('situacaoPessoa').value === 'Preso');
+  }
+
+  function resetProcessForm() {
+    editingId = null;
+    $('processForm').reset();
+    updateSubtipos();
+    updatePessoaStyle();
+    $('processFormTitle').textContent = 'Cadastrar processo';
+    $('saveProcessBtn').textContent = 'Salvar processo';
+    $('cancelEditBtn').hidden = true;
+  }
+
+  function startEditing(id) {
+    const processo = processos.find(p => p.id === id);
+    if (!processo) return status('Processo não encontrado para edição.', true);
+    editingId = id;
+    $('numero').value = formatNumero(processo.numero_processo);
+    $('atuacao').value = processo.atuacao;
+    $('tipo').value = processo.tipo;
+    updateSubtipos(processo.subtipo);
+    $('situacaoPessoa').value = processo.situacao_pessoa;
+    $('situacaoEnvio').value = processo.situacao_envio;
+    $('dataPrazo').value = processo.data_prazo;
+    $('observacao').value = processo.observacao || '';
+    updatePessoaStyle();
+    $('processFormTitle').textContent = 'Editar processo';
+    $('saveProcessBtn').textContent = 'Salvar alterações';
+    $('cancelEditBtn').hidden = false;
+    $('processForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    status('Processo carregado para edição. Altere os campos desejados e salve.');
   }
 
   $('configForm').addEventListener('submit', async event => {
@@ -163,23 +201,30 @@
   });
 
   $('logoutBtn').addEventListener('click', () => db?.auth.signOut());
-  $('tipo').addEventListener('change', updateSubtipos);
-  $('situacaoPessoa').addEventListener('change', event => {
-    event.target.classList.toggle('font-semibold', event.target.value === 'Preso');
-    event.target.classList.toggle('text-red-700', event.target.value === 'Preso');
-  });
+  $('tipo').addEventListener('change', () => updateSubtipos());
+  $('situacaoPessoa').addEventListener('change', updatePessoaStyle);
+  $('cancelEditBtn').addEventListener('click', resetProcessForm);
   $('numero').addEventListener('blur', event => { event.target.value = formatNumero(event.target.value); });
 
   $('processForm').addEventListener('submit', async event => {
     event.preventDefault();
-    const row = { user_id: currentUser.id, numero_processo: normalizeNumero($('numero').value), atuacao: $('atuacao').value, tipo: $('tipo').value, subtipo: $('subtipo').value, situacao_pessoa: $('situacaoPessoa').value, situacao_envio: $('situacaoEnvio').value, data_prazo: $('dataPrazo').value };
+    const row = { numero_processo: normalizeNumero($('numero').value), atuacao: $('atuacao').value, tipo: $('tipo').value, subtipo: $('subtipo').value, situacao_pessoa: $('situacaoPessoa').value, situacao_envio: $('situacaoEnvio').value, data_prazo: $('dataPrazo').value, observacao: $('observacao').value.trim() };
     if (!isValidNumero($('numero').value)) return status('Número inválido. Use o padrão CNJ 8120938-59.2026.8.05.0001 ou IDEA 003.9.323097/2026.', true);
-    const { error } = await db.from('processos').insert(row);
+    if (row.observacao.length > 100) return status('A observação deve ter no máximo 100 caracteres.', true);
+    const result = editingId
+      ? await db.from('processos').update(row).eq('id', editingId)
+      : await db.from('processos').insert({ ...row, user_id: currentUser.id });
+    const { error } = result;
     if (error) return status(error.message, true);
-    event.target.reset(); updateSubtipos(); status('Processo cadastrado.'); await loadProcessos();
+    const wasEditing = !!editingId;
+    resetProcessForm();
+    status(wasEditing ? 'Alterações salvas.' : 'Processo cadastrado.');
+    await loadProcessos();
   });
 
   $('processList').addEventListener('click', async event => {
+    const editId = event.target.dataset.edit;
+    if (editId) return startEditing(editId);
     const sentId = event.target.dataset.markSent;
     if (sentId) {
       if (!confirm('Marcar este processo como enviado?')) return;
@@ -202,10 +247,10 @@
       const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' });
       const raw = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: '' });
       const rows = raw.map((r, index) => ({
-        user_id: currentUser.id, numero_processo: normalizeNumero(r.Numero), atuacao: String(r.Atuacao ?? r.Atuação).trim(), tipo: String(r.Tipo).trim(), subtipo: String(r.Subtipo).trim(), situacao_pessoa: String(r.SituacaoPessoa ?? r['SituaçãoPessoa']).trim(), situacao_envio: String(r.SituacaoEnvio ?? r['SituaçãoEnvio']).trim(), data_prazo: isoDate(r.Prazo), _line: index + 2
+        user_id: currentUser.id, numero_processo: normalizeNumero(r.Numero), atuacao: String(r.Atuacao ?? r.Atuação).trim(), tipo: String(r.Tipo).trim(), subtipo: String(r.Subtipo).trim(), situacao_pessoa: String(r.SituacaoPessoa ?? r['SituaçãoPessoa']).trim(), situacao_envio: String(r.SituacaoEnvio ?? r['SituaçãoEnvio']).trim(), data_prazo: isoDate(r.Prazo), observacao: String(r.Observacao ?? r['Observação'] ?? '').trim(), _line: index + 2
       }));
-      const invalid = rows.find(r => !isValidNumero(r.numero_processo) || !['Titularidade', 'Substituição'].includes(r.atuacao) || !SUBTIPOS[r.tipo]?.includes(r.subtipo) || !['Preso', 'Solto'].includes(r.situacao_pessoa) || !['Pendente', 'Enviado'].includes(r.situacao_envio) || !r.data_prazo);
-      if (invalid) throw new Error(`Dados inválidos na linha ${invalid._line}. Confira Numero, Atuacao, Tipo, Subtipo, SituacaoPessoa, SituacaoEnvio e Prazo.`);
+      const invalid = rows.find(r => !isValidNumero(r.numero_processo) || !['Titularidade', 'Substituição'].includes(r.atuacao) || !SUBTIPOS[r.tipo]?.includes(r.subtipo) || !['Preso', 'Solto'].includes(r.situacao_pessoa) || !['Pendente', 'Enviado'].includes(r.situacao_envio) || !r.data_prazo || r.observacao.length > 100);
+      if (invalid) throw new Error(`Dados inválidos na linha ${invalid._line}. Confira Numero, Atuacao, Tipo, Subtipo, SituacaoPessoa, SituacaoEnvio, Prazo e Observacao.`);
       if (!rows.length) throw new Error('A planilha não contém registros.');
       rows.forEach(r => delete r._line);
       const { error } = await db.from('processos').insert(rows);
@@ -229,5 +274,5 @@
     $('configSection').hidden = false;
     status(`Não foi possível conectar automaticamente: ${error.message}`, true);
   });
-  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=6').catch(() => {}));
+  if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js?v=7').catch(() => {}));
 })();

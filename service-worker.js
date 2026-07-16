@@ -1,5 +1,5 @@
-const CACHE = 'acompanhamento-processos-v6';
-const LOCAL_ASSETS = ['./', './index.html', './app.js?v=6', './manifest.json'];
+const CACHE = 'acompanhamento-processos-v7';
+const LOCAL_ASSETS = ['./', './index.html', './app.js?v=7', './manifest.json'];
 
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(LOCAL_ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));
