@@ -7,7 +7,7 @@
   const DEFAULT_SUPABASE_KEY = 'sb_publishable_O1y_D3brXF3twhpWhZQ9RQ_mRtIX3yT';
 
   const SUBTIPOS = Object.freeze({
-    'Inquérito': ['Declínio', 'Arquivamento', 'Retorno à DEPOL'],
+    'Inquérito': ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP'],
     'APF': ['Não se aplica'],
     'Ação Penal': ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos'],
     'Medida Cautelar': ['Ciência', 'Diligência', 'Manifestação']

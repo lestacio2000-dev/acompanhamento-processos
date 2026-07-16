@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { SUBTIPOS, normalizeNumero, formatNumero, isValidNumero, filterByDate, filterByAtuacao } = require('../app.js');
 
-assert.deepEqual(SUBTIPOS['Inquérito'], ['Declínio', 'Arquivamento', 'Retorno à DEPOL']);
+assert.deepEqual(SUBTIPOS['Inquérito'], ['Declínio', 'Arquivamento', 'Retorno à DEPOL', 'Diligência_Secretaria', 'audiencia ANPP']);
 assert.deepEqual(SUBTIPOS.APF, ['Não se aplica']);
 assert.deepEqual(SUBTIPOS['Ação Penal'], ['Ciência', 'Manifestação', 'ANPP', 'Alegações Finais', 'Recursos']);
 assert.deepEqual(SUBTIPOS['Medida Cautelar'], ['Ciência', 'Diligência', 'Manifestação']);

@@ -21,7 +21,7 @@ Nunca use a chave `service_role` no aplicativo. As políticas RLS permitem acess
 - IDEA/MPBA: `003.9.323097/2026`
 - Planilha: colunas `Numero`, `Atuacao`, `Tipo`, `Subtipo`, `SituacaoPessoa`, `SituacaoEnvio` e `Prazo`. Em `Atuacao`, use `Titularidade` ou `Substituição`; em `SituacaoPessoa`, `Preso` ou `Solto`; e em `SituacaoEnvio`, `Pendente` ou `Enviado`.
 
-O tipo `Inquérito` oferece os subtipos `Declínio`, `Arquivamento` e `Retorno à DEPOL`. O tipo `APF` usa o subtipo `Não se aplica`. A situação `Preso` aparece em vermelho nas listagens e nos relatórios.
+O tipo `Inquérito` oferece os subtipos `Declínio`, `Arquivamento`, `Retorno à DEPOL`, `Diligência_Secretaria` e `audiencia ANPP`. O tipo `APF` usa o subtipo `Não se aplica`. A situação `Preso` aparece em vermelho nas listagens e nos relatórios.
 
 Processos pendentes exibem a ação **Marcar como enviado**. A alteração é compartilhada em tempo real e pode disparar uma mensagem pelo Telegram.
 
