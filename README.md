@@ -35,6 +35,8 @@ Processos pendentes exibem a ação **Marcar como enviado**. A alteração é co
 
 O token é secreto: não o coloque em `app.js`, neste README, no GitHub ou em qualquer arquivo publicado. Se os segredos ainda não estiverem configurados, o processo será atualizado normalmente e nenhuma mensagem será enviada.
 
+O envio é assíncrono pelo `pg_net`, com timeout de 15 segundos para acomodar oscilações de rede entre o Supabase e a API do Telegram.
+
 O acervo é separado logicamente entre **Titularidade — 3ª Promotoria de Tóxicos/4º Promotor** e **Substituição — 3ª Promotoria de Tóxicos/1º Promotor**. A lista identifica a atuação e o relatório permite consultar uma delas ou ambas.
 
 Os sinais dos números são removidos antes da gravação e recompostos na exibição. Isso permite pesquisa e armazenamento consistentes sem perder o padrão visual oficial.

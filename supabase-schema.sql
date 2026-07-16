@@ -94,7 +94,8 @@ begin
     perform net.http_post(
       url := 'https://api.telegram.org/bot' || bot_token || '/sendMessage',
       headers := jsonb_build_object('Content-Type', 'application/json'),
-      body := jsonb_build_object('chat_id', chat_id, 'text', mensagem)
+      body := jsonb_build_object('chat_id', chat_id, 'text', mensagem),
+      timeout_milliseconds := 15000
     );
   end if;
   return new;
